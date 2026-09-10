@@ -1,0 +1,88 @@
+@page "/predicted-split"
+@rendermode InteractiveServer
+
+<h3>Split Predictor</h3>
+
+<div>
+    <label>Distance (meters):</label>
+    <input type="number" @bind="distance" />
+</div>
+
+<h4>Target Time</h4>
+
+<div>
+    <label>Minutes:</label>
+    <input type="number" @bind="targetMin" />
+</div>
+
+<div>
+    <label>Seconds:</label>
+    <input type="number" @bind="targetSec" />
+</div>
+
+<button @onclick="CalculateSplit">Calculate</button>
+
+@if (resultText != null)
+{
+    <p><b>Your split: @resultText</b></p>
+}
+
+<h4>Athlete Profile</h4>
+
+<button @onclick="SprinterCalculation">Sprinter</button>
+@if (resultText != null)
+{
+    <p><b>Your split: @resultText</b></p>
+}
+
+<button @onclick="BalanceCalculation">Balance</button>
+@if (resultText != null)
+{
+    <p><b>Your split: @resultText</b></p>
+}
+
+<button @onclick="EnduranceCalculation">Endurance</button>
+@if (resultText != null)
+{
+    <p><b>Your split: @resultText</b></p>
+}
+
+@code {
+    private int distance;
+    private int targetMin;
+    private int targetSec;
+    private string? resultText;
+
+    private int CalculateSplit()
+    {
+        int targetTime = (targetMin * 60) + targetSec;
+        double pace = (double)targetTime / distance * 500; 
+        int minutes = (int)(pace / 60);
+        double seconds = pace % 60;
+        resultText = $"{minutes}:{seconds:F0}";
+        return (int)pace;
+    }
+
+    private int SprinterCalculation()
+    {
+        int time = CalculateSplit();
+        int predic = (int)Math.Pow(time * (5000.0 / distance), 1.08);
+        resultText = $"{minutes}:{seconds:F0}";
+        return predic;
+   }
+
+    private int BalanceCalculation()
+    {
+        int time = CalculateSplit();
+        int predic = (int)Math.Pow(time * (5000.0 / distance), 1.06);
+        return predic;
+    }
+
+    private int EnduranceCalculation()
+    {
+        int time = CalculateSplit();
+        int predic = (int)Math.Pow(time * (5000.0 / distance), 1.04);
+        return predic;
+
+    }
+}

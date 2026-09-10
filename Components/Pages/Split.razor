@@ -1,0 +1,44 @@
+﻿@page "/split-calculator"
+@rendermode InteractiveServer
+
+<h3>Split Calculator</h3>
+
+<div>
+    <label>Distance (meters):</label>
+    <input type="number" @bind="distance" />
+</div>
+
+<h4>Target Time</h4>
+
+<div>
+    <label>Minutes:</label>
+    <input type="number" @bind="targetMin" />
+</div>
+
+<div>
+    <label>Seconds:</label>
+    <input type="number" @bind="targetSec" />
+</div>
+
+<button @onclick="CalculateSplit">Calculate</button>
+
+@if (resultText != null)
+{
+    <p><b>Your split: @resultText</b></p>
+}
+
+@code {
+    private int distance;
+    private int targetMin;
+    private int targetSec;
+    private string? resultText;
+
+    private void CalculateSplit()
+    {
+        int targetTime = (targetMin * 60) + targetSec;
+        double pace = (double)targetTime / distance * 500;
+        int minutes = (int)(pace / 60);
+        double seconds = pace % 60;
+        resultText = $"{minutes}:{seconds:F0}";
+    }
+}
