@@ -32,19 +32,19 @@
 <button @onclick="SprinterCalculation">Sprinter</button>
 @if (resultText != null)
 {
-    <p><b>Your split: @resultText</b></p>
+    <p><b>Your split: @sprinterResultText</b></p>
 }
 
 <button @onclick="BalanceCalculation">Balance</button>
 @if (resultText != null)
 {
-    <p><b>Your split: @resultText</b></p>
+    <p><b>Your split: @balanceResultText</b></p>
 }
 
 <button @onclick="EnduranceCalculation">Endurance</button>
 @if (resultText != null)
 {
-    <p><b>Your split: @resultText</b></p>
+    <p><b>Your split: @enduranceResultText</b></p>
 }
 
 @code {
@@ -52,37 +52,55 @@
     private int targetMin;
     private int targetSec;
     private string? resultText;
+    private string? sprinterResultText;
+    private string? balanceResultText;
+    private string? enduranceResultText;
 
-    private int CalculateSplit()
+
+
+    private int CalculateSplitTime()
     {
         int targetTime = (targetMin * 60) + targetSec;
         double pace = (double)targetTime / distance * 500; 
-        int minutes = (int)(pace / 60);
-        double seconds = pace % 60;
-        resultText = $"{minutes}:{seconds:F0}";
         return (int)pace;
     }
-
-    private int SprinterCalculation()
+    private void CalculateSplit()
     {
-        int time = CalculateSplit();
-        int predic = (int)Math.Pow(time * (5000.0 / distance), 1.08);
+        int time = CalculateSplitTime();
+        int minutes = (int)(time / 60);
+        double seconds = time % 60;
         resultText = $"{minutes}:{seconds:F0}";
-        return predic;
-   }
-
-    private int BalanceCalculation()
-    {
-        int time = CalculateSplit();
-        int predic = (int)Math.Pow(time * (5000.0 / distance), 1.06);
-        return predic;
     }
 
-    private int EnduranceCalculation()
+    private void SprinterCalculation()
     {
-        int time = CalculateSplit();
+        int time = CalculateSplitTime();
+        int predic = (int)Math.Pow(time * (5000.0 / distance), 1.08);
+        int minutes = (int)(predic / 60);
+        double seconds = predic % 60;
+        sprinterResultText = $"{minutes}:{seconds:F0}";
+   }
+
+    private void BalanceCalculation()
+    {
+        int time = CalculateSplitTime();
+        int predic = (int)Math.Pow(time * (5000.0 / distance), 1.06);
+        int minutes = (int)(predic / 60);
+        double seconds = predic% 60;
+        balanceResultText = $"{minutes}:{seconds:F0}";
+
+        @* return predic; *@
+    }
+
+    private void EnduranceCalculation()
+    {
+        int time = CalculateSplitTime();
         int predic = (int)Math.Pow(time * (5000.0 / distance), 1.04);
-        return predic;
+        int minutes = (int)(predic / 60);
+        double seconds = predic % 60;
+        enduranceResultText = $"{minutes}:{seconds:F0}";
+
+        @* return predic; *@
 
     }
 }
