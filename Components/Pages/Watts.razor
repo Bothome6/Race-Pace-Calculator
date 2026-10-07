@@ -22,7 +22,7 @@
 
 @if (resultText != null)
 {
-    <p><b>Your split: @resultText</b></p>
+    <p><b>@resultText</b></p>
 }
 
 @code {
@@ -32,19 +32,19 @@
 
     private string ?resultText;
 
-    private int CalculateSplit()
+    private double CalculateSplit()
     {
         int targetTime = (targetMin * 60) + targetSec;
         double pace = (double)targetTime / distance * 500;
-        int minutes = (int)(pace / 60);
+        double minutes = (pace / 60);
         double seconds = pace % 60;
-        resultText = $"{minutes}:{seconds:F0}";
-        return (int)pace;
+        resultText = $"{minutes}:{seconds:00}";
+        return (double)pace;
     }
 
     private double CalculatePace()
     {
-        int split = CalculateSplit();
+        double split = CalculateSplit();
         return split / 500.0;
     }
 

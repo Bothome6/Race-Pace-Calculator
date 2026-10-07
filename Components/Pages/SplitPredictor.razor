@@ -79,10 +79,10 @@
 
     private void CalculateAll()
     {
-        CalculateSplit();
         Calculate100();
         Calculate500();
         Calculate1000();
+        Calculate2000();
         Calculate5000();
         Calculate10000();
 
@@ -92,62 +92,62 @@
         int time = CalculateSplitTime();
         int minutes = (int)(time / 60);
         double seconds = time % 60;
-        resultText = $"{minutes}:{seconds:F0}";
+        resultText = $"{minutes}:{seconds:00}";
         
     }
 
     private void Calculate100()
     {
         int time = CalculateSplitTime();
-        int predic = (int)(time + 5 * Math.Log(100.0 / distance));
+        int predic = (int)(time + 5 * Math.Log2(100.0 / distance));
         int totalTime = predic * 100 / 500;
         int minutes = (int)(totalTime / 60);
         double seconds = totalTime% 60;
-        firstResultText = $"{minutes}:{seconds:F0}";
+        firstResultText = $"{minutes}:{seconds:00}";
     }
     private void Calculate500()
     {
         int time = CalculateSplitTime();
-        int predic = (int)(time + 5 * Math.Log(500.0 / distance));
+        int predic = (int)(time + 5 * Math.Log2(500.0 / distance));
         int totalTime = predic * 500 / 500;
         int minutes = (int)(totalTime / 60);
         double seconds = totalTime% 60;
-        secondResultText = $"{minutes}:{seconds:F0}";
+        secondResultText = $"{minutes}:{seconds:00}";
     }
     private void Calculate1000()
     {
         int time = CalculateSplitTime();
-        int predic = (int)(time + 5 * Math.Log(1000.0 / distance));
+        int predic = (int)(time + 5 * Math.Log2(1000.0 / distance));
         int totalTime = predic * 1000 / 500;
         int minutes = (int)(totalTime / 60);
         double seconds = totalTime% 60;
-        thirdResultText = $"{minutes}:{seconds:F0}";
+        thirdResultText = $"{minutes}:{seconds:00}";
     }
-    private void Calcule2000()
+    private void Calculate2000()
     {
         int time = CalculateSplitTime();
-        int predic = (int)(time + 5 * Math.Log(2000.0 / distance));
+        int predic = (int)(time + 5 * Math.Log2(2000.0 / distance));
         int totalTime = predic * 2000 / 500;
         int minutes = (int)(totalTime / 60);
         double seconds = totalTime% 60;
-        resultText = $"{minutes}:{seconds:F0}";
+        resultText = $"{minutes}:{seconds:00}";
     }
     private void Calculate5000()
     {
         int time = CalculateSplitTime();
-        int predic = (int)(time + 5 * Math.Log(5000.0 / distance));
+        int predic = (int)(time + 5 * Math.Log2(5000.0 / distance));
         int totalTime = predic * 5000 / 500;
         int minutes = (int)(totalTime / 60);
         double seconds = totalTime% 60;
-        fiveResultText = $"{minutes}:{seconds:F0}";
+        fiveResultText = $"{minutes}:{seconds:00}";
     }
     private void Calculate10000()
     {
         int time = CalculateSplitTime();
-        int predic = (int)(time + 5 * Math.Log(10000.0 / distance));
+        int predic = (int)(time + 5 * Math.Log2(10000.0 / distance));
         int totalTime = predic * 10000 / 500;
         int minutes = (int)(totalTime / 60);
         double seconds = totalTime% 60;
-        sixResultText = $"{minutes}:{seconds:F0}";
+        sixResultText = $"{minutes}:{seconds:00}";
     }
 }

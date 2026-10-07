@@ -37,8 +37,8 @@
     {
         int targetTime = (targetMin * 60) + targetSec;
         double pace = (double)targetTime / distance * 500;
-        int minutes = (int)(pace / 60);
+        int  minutes = (int)(pace / 60);
         double seconds = pace % 60;
-        resultText = $"{minutes}:{seconds:F0}";
+        resultText = $"{minutes}:{seconds:00}";
     }
 }
