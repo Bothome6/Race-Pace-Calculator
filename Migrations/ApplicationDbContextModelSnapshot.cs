@@ -174,6 +174,9 @@ namespace NEA_Rowing_Calculation_Website.Migrations
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
                         .HasColumnType("TEXT");
@@ -211,6 +214,38 @@ namespace NEA_Rowing_Calculation_Website.Migrations
                         .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("NEA_Rowing_Calculation_Website.Model.Workout", b =>
+                {
+                    b.Property<int>("WorkoutID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ExperienceLevel")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PlanFocus")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PrimaryGoal")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SessionPerWeek")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserID")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("WorkoutID");
+
+                    b.HasIndex("UserID");
+
+                    b.ToTable("Workouts");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -262,6 +297,22 @@ namespace NEA_Rowing_Calculation_Website.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("NEA_Rowing_Calculation_Website.Model.Workout", b =>
+                {
+                    b.HasOne("NEA_Rowing_Calculation_Website.Data.ApplicationUser", "User")
+                        .WithMany("Workouts")
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("NEA_Rowing_Calculation_Website.Data.ApplicationUser", b =>
+                {
+                    b.Navigation("Workouts");
                 });
 #pragma warning restore 612, 618
         }
