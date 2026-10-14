@@ -1,7 +1,14 @@
 @page "/workout-generator"
+@using Microsoft.CodeAnalysis.CSharp.Syntax
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthProvider
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
+@using Microsoft.EntityFrameworkCore
+@using NEA_Rowing_Calculation_Website.Data
 @using NEA_Rowing_Calculation_Website.Model
 @rendermode InteractiveServer
-@inject
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
 
 <h2>Generate your rowing workout</h2>
 
@@ -9,9 +16,9 @@
     <!-- Primary Goal -->
     <div>
         <label>Primary Goal</label>
-        <select @bind="ApplicationDbContext.PrimaryGoal">
+        <select @bind="WorkoutFeature.PrimaryGoal">
             <option value="">-- Choose Goal --</option>
-            <option value="FatLoss">Fat Losse</option>
+            <option value="FatLoss">Fat Loss</option>
             <option value="Endurance">Endurance</option>
             <option value="2kTest">2k Test Prep</option>
         </select>
@@ -20,7 +27,7 @@
     <div>
         <!--Experience Level-->
         <label >Experience Level</label>
-        <select @bind="Workout.ExperienceLevel">
+        <select @bind="WorkoutFeature.ExperienceLevel">
             <option value="">-- Choose Level --</option>
             <option value="Beginner">Beginner</option>
             <option value="Intermediate">Intermediate</option>
@@ -31,7 +38,7 @@
     <div>
         <!--Session Per Week-->
         <label >Sessions Per Week</label>
-        <select @bind="Workout.SessionsPerWeek">
+        <select @bind="WorkoutFeature.SessionPerWeek">
             <option value="">-- Choose Frequency --</option>
             <option value="1-2">1-2</option>
             <option value="3-4">3-4</option>
@@ -43,7 +50,7 @@
     <div>
         <!--Focus-->
         <label >Focus</label>
-        <select @bind="Workout.PlanFocus">
+        <select @bind="WorkoutFeature.PlanFocus">
             <option value="">-- Choose Focus --</option>
             <option value="Technique">Technique</option>
             <option value="Power">Power</option>
@@ -52,31 +59,115 @@
     </div>
 
     <div>
-        <button @onclick="SaveGenerateWorkout">Save & Generate Workout</button>
+        <button @onclick="GenerateTable">Generate Table</button>
     </div>
+        <label class="errormessage">@errorMessage</label>
+
 </div>
 
+@* @if (2k)
+    {
+        <h3>Split Calculator</h3>
+
+    <div>
+        <label>Distance (meters):</label>
+        <input type="number" @bind="distance" />
+    </div>
+
+    <h4>Target Time</h4>
+
+    <div>
+        <label>Minutes:</label>
+        <input type="number" @bind="targetMin" />
+    </div>
+
+    <div>
+        <label>Seconds:</label>
+        <input type="number" @bind="targetSec" />
+    </div>
+
+    <button @onclick="CalculateSplit">Calculate</button>
+} *@
+
 @if (isSaved)
+{
     <div>
         <h5>Workout Plan Generated Successfully</h5>
         <table class="WorkoutGeneratedTable">
             <thead class="TableDarkness">
                 <tr>
-                    <th>Goal</th>
-                    <th>Experience</th>
-                    <th>Sessions</th>
-                    <th>Focus</th>
-                    <th>Created</th>
+                    <th>Monday</th>
+                    <th>Tuesday</th>
+                    <th>Wednesday</th>
+                    <th>Thursday</th>
+                    <th>Friday</th>
+                    <th>Saturday</th>
+                    <th>Sunday</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td>@Workout.PrimaryGoal</td>
-                    <td>@Workout.ExperienceLevel</td>
-                    <td>@Workout.SessionPerWeek</td>
-                    <td>@Workout.PlanFocus</td>
-                    <td>@Workout.DateCreated.ToShortDateString()</td>
+                    <td>@WorkoutFeature.PrimaryGoal</td>
+                    <td>@WorkoutFeature.ExperienceLevel</td>
+                    <td>@WorkoutFeature.SessionPerWeek</td>
+                    <td>@WorkoutFeature.PlanFocus</td>
+                    <td>@WorkoutFeature.DateCreated.ToShortDateString()</td>
                 </tr>
             </tbody>
         </table>
     </div>
+}
+
+@code
+{
+    private Workout WorkoutFeature = new Workout();
+    private bool isSaved = false;
+    string errorMessage = "";
+    @* private int distance;
+    private int targetMin;
+    private int targetSec;
+    private int resultTest;
+
+    private void CalculateSplit()
+    {
+        int targetTime = (targetMin * 60) + targetSec;
+        double pace = (double)targetTime / distance * 500;
+        int  minutes = (int)(pace / 60);
+        double seconds = pace % 60;
+        resultText = $"{minutes}:{seconds:00}";
+    } *@
+
+    private void GenerateTable()
+    {
+        isSaved = false;
+        errorMessage = "Please select an option in each feature.";
+
+        if (string.IsNullOrWhiteSpace(WorkoutFeature.PrimaryGoal))
+        {
+            Console.WriteLine(errorMessage);
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(WorkoutFeature.ExperienceLevel))
+        {
+            Console.WriteLine(errorMessage);
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(WorkoutFeature.SessionPerWeek))
+        {
+            Console.WriteLine(errorMessage);
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(WorkoutFeature.PlanFocus))
+        {
+            Console.WriteLine(errorMessage);
+            return;
+        }
+
+        WorkoutFeature.DateCreated = DateTime.Now;
+        isSaved = true;
+    }
+
+}

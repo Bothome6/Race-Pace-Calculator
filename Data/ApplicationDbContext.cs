@@ -9,6 +9,7 @@ namespace NEA_Rowing_Calculation_Website.Data
     public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<ApplicationUser>(options)
     {
         public DbSet<Workout> Workouts { get; set; }
+        public DbSet<WorkoutSession> WorkoutSessions { get; set; }
     }
     
 }

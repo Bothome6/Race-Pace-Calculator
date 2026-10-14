@@ -13,8 +13,7 @@ var connectingString = builder.Configuration.GetConnectionString("ApplicationDbC
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-// Use ApllicationDbContext with SQLite
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
+builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
     options.UseSqlite(connectingString));
 
 // Use ApplicationUser for identity

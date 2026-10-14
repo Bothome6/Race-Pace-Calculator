@@ -1,7 +1,22 @@
-﻿@page "/"
+﻿@* @using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthenticationStateProvider *@
+@page "/"
 
 <PageTitle>Home</PageTitle>
 
 <h1>All About Rowing</h1>
 
 <p>Learn how rowing statistics are calculated and try our variation of calcualtors.</p>
+
+@* <p>User ID: @(userId ?? "Not signed in")</p>
+
+@code {
+    private string? userId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        userId = state.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    }
+} *@
