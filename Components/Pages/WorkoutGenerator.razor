@@ -1,9 +1,13 @@
 @page "/workout-generator"
-@using Microsoft.CodeAnalysis.CSharp.Syntax
+@using System.ComponentModel
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.CodeAnalysis.CSharp.Syntax
+@using Microsoft.CodeAnalysis.CodeActions
+@using Microsoft.CodeAnalysis.Diagnostics
+@using NEA_Rowing_Calculation_Website.Migrations
+@using NuGet.Common
 @inject AuthenticationStateProvider AuthProvider
-@inject IDbContextFactory<ApplicationDbContext> DbFactory
 @using Microsoft.EntityFrameworkCore
 @using NEA_Rowing_Calculation_Website.Data
 @using NEA_Rowing_Calculation_Website.Model
@@ -40,9 +44,12 @@
         <label >Sessions Per Week</label>
         <select @bind="WorkoutFeature.SessionPerWeek">
             <option value="">-- Choose Frequency --</option>
-            <option value="1-2">1-2</option>
-            <option value="3-4">3-4</option>
-            <option value="5-6">5-6</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
             <option value="7">7</option>
         </select>
     </div>
@@ -61,8 +68,9 @@
     <div>
         <button @onclick="GenerateTable">Generate Table</button>
     </div>
+    <div>
         <label class="errormessage">@errorMessage</label>
-
+    </div>
 </div>
 
 @* @if (2k)
@@ -110,7 +118,7 @@
                     <td>@WorkoutFeature.PrimaryGoal</td>
                     <td>@WorkoutFeature.ExperienceLevel</td>
                     <td>@WorkoutFeature.SessionPerWeek</td>
-                    <td>@WorkoutFeature.PlanFocus</td>
+                    <td>@WorkoutFeature.PlanFocus</td
                     <td>@WorkoutFeature.DateCreated.ToShortDateString()</td>
                 </tr>
             </tbody>
@@ -118,11 +126,16 @@
     </div>
 }
 
+    <div>
+        <button @onclick="SaveTable">Save Table</button>
+    </div>
+
 @code
 {
     private Workout WorkoutFeature = new Workout();
     private bool isSaved = false;
     string errorMessage = "";
+    
     @* private int distance;
     private int targetMin;
     private int targetSec;
@@ -165,9 +178,65 @@
             Console.WriteLine(errorMessage);
             return;
         }
+        var monday = DateTime.Today.AddDays(
+            ((int)DaysOfWeek.monday - (int)DateTime.Today.DayOfWeek + 7) % 7);
 
-        WorkoutFeature.DateCreated = DateTime.Now;
+            if (monday == DateTime.Today){ monday = monday.AddDays(7);}
+            
+
+        int[] session = new int[7];
+        int[]? dayOffsets = WorkoutFeature.SessionPerWeek switch
+        {
+            "1" => new[] {5},
+            "2" => new[] {0, 5},
+            "3" => new[] {0, 2, 5},
+            "4" => new[] {0, 2, 4, 6},
+            "5" => new[] {0, 2, 4, 5, 6},
+            "6" => new[] {0, 1, 2, 4, 5, 6},
+            "7" => new[] {
+    0, 1, 2, 3, 4, 5, 6},
+            _   => Array.Empty<int>()
+        };
+
+        GeneratedSession = dayOffsets.Select((offset, index) => new WorkoutInformation
+        {
+            SessionNumber = index + 1,
+            Description = WorkoutFeature.WorkoutInformation,
+            plannedDate = monday.AddDays(dayOffsets)
+        }).ToList();
+
+
         isSaved = true;
+    }
+
+    private async Task SaveTable()
+    {
+        AuthenticationState? auth = await AuthProvider.GetAuthenticationStateAsync();
+        ClaimsPrincipal? user = auth.User;
+        string? userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            errorMessage = "Sign in before saving a plan.";
+            return;
+        }
+
+        Workout? plan = new Workout
+        {
+            UserID = userId,
+            PrimaryGoal = WorkoutFeature.PrimaryGoal,
+            ExperienceLevel = WorkoutFeature.ExperienceLevel,
+            SessionPerWeek = WorkoutFeature.SessionPerWeek,
+            PlanFocus = WorkoutFeature.PlanFocus,
+            DateCreated = DateTime.UtcNow,
+            @* Sessions = Preview *@
+        };
+
+        await using ApplicationDbContext? db = await DbFactory.CreateDbContextAsync();
+        db.Workouts.Add(plan);
+        await db.SaveChangesAsync();
+
+        errorMessage = "Plan saved.";
     }
 
 }

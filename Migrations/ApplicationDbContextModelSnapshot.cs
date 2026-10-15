@@ -222,6 +222,9 @@ namespace NEA_Rowing_Calculation_Website.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("Abandoned")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("TEXT");
 
@@ -237,8 +240,10 @@ namespace NEA_Rowing_Calculation_Website.Migrations
                     b.Property<string>("SessionPerWeek")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("TwoKSplit")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("UserID")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("WorkoutID");
@@ -246,6 +251,38 @@ namespace NEA_Rowing_Calculation_Website.Migrations
                     b.HasIndex("UserID");
 
                     b.ToTable("Workouts");
+                });
+
+            modelBuilder.Entity("NEA_Rowing_Calculation_Website.WorkoutSession", b =>
+                {
+                    b.Property<int>("WorkoutSessionID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("Done")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("DoneDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("PlannedDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("SessionNumber")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("TaskDescription")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("WorkoutID")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("WorkoutSessionID");
+
+                    b.HasIndex("WorkoutID");
+
+                    b.ToTable("WorkoutSessions");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -303,16 +340,30 @@ namespace NEA_Rowing_Calculation_Website.Migrations
                 {
                     b.HasOne("NEA_Rowing_Calculation_Website.Data.ApplicationUser", "User")
                         .WithMany("Workouts")
-                        .HasForeignKey("UserID")
+                        .HasForeignKey("UserID");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("NEA_Rowing_Calculation_Website.WorkoutSession", b =>
+                {
+                    b.HasOne("NEA_Rowing_Calculation_Website.Model.Workout", "Workout")
+                        .WithMany("Sessions")
+                        .HasForeignKey("WorkoutID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("User");
+                    b.Navigation("Workout");
                 });
 
             modelBuilder.Entity("NEA_Rowing_Calculation_Website.Data.ApplicationUser", b =>
                 {
                     b.Navigation("Workouts");
+                });
+
+            modelBuilder.Entity("NEA_Rowing_Calculation_Website.Model.Workout", b =>
+                {
+                    b.Navigation("Sessions");
                 });
 #pragma warning restore 612, 618
         }

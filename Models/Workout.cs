@@ -23,11 +23,8 @@ namespace NEA_Rowing_Calculation_Website.Model
         public ICollection<WorkoutSession> Sessions { get; set; }
         = new List<WorkoutSession>();
 
-
-    }
-    
-    public string WorkoutInformation => (ExperienceLevel, PrimaryGoal, PlanFocus) switch
-    {
+        public string WorkoutInformation => (ExperienceLevel, PrimaryGoal, PlanFocus) switch
+        {
             ("Beginner", "Fat Loss", "Technique") => "20 min with drill pyramid, 18-20 spm",
             ("Beginner", "Fat Loss", "Power") => "20 min steady, 10 power strokes every 2 min, 20 spm",
             ("Beginner", "Fat Loss", "Cardio") => "25 min steady, 20 spm",
@@ -55,6 +52,7 @@ namespace NEA_Rowing_Calculation_Website.Model
             ("Experienced", "2kTest", "Technique") => "8 × 500m at 2k split +2s with 90 sec rest, 32 spm",
             ("Experienced", "2kTest", "Power") => "10 × 250m at 2k split −3s with 2 min rest, 32 spm",
             ("Experienced", "2kTest", "Cardio") => "5 × 1000m at 2k split +4s with 3 min rest, 26 spm"
-    };
+        };
+    }
 
 }
