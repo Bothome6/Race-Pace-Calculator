@@ -22,7 +22,7 @@
         <label>Primary Goal</label>
         <select @bind="WorkoutFeature.PrimaryGoal">
             <option value="">-- Choose Goal --</option>
-            <option value="FatLoss">Fat Loss</option>
+            <option value="Fat Loss">Fat Loss</option>
             <option value="Endurance">Endurance</option>
             <option value="2kTest">2k Test Prep</option>
         </select>
@@ -118,7 +118,7 @@
                     <td>@WorkoutFeature.PrimaryGoal</td>
                     <td>@WorkoutFeature.ExperienceLevel</td>
                     <td>@WorkoutFeature.SessionPerWeek</td>
-                    <td>@WorkoutFeature.PlanFocus</td
+                    <td>@WorkoutFeature.PlanFocus</td>
                     <td>@WorkoutFeature.DateCreated.ToShortDateString()</td>
                 </tr>
             </tbody>
@@ -135,6 +135,7 @@
     private Workout WorkoutFeature = new Workout();
     private bool isSaved = false;
     string errorMessage = "";
+    private List<WorkoutSession> GeneratedSessions {get;set;} = new List<WorkoutSession>();
     
     @* private int distance;
     private int targetMin;
@@ -150,38 +151,25 @@
         resultText = $"{minutes}:{seconds:00}";
     } *@
 
+
     private void GenerateTable()
     {
         isSaved = false;
         errorMessage = "Please select an option in each feature.";
 
-        if (string.IsNullOrWhiteSpace(WorkoutFeature.PrimaryGoal))
+        if (string.IsNullOrWhiteSpace(WorkoutFeature.PrimaryGoal) ||
+        string.IsNullOrWhiteSpace(WorkoutFeature.ExperienceLevel) ||
+        string.IsNullOrWhiteSpace(WorkoutFeature.SessionPerWeek) || 
+        string.IsNullOrWhiteSpace(WorkoutFeature.PlanFocus))
         {
             Console.WriteLine(errorMessage);
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(WorkoutFeature.ExperienceLevel))
-        {
-            Console.WriteLine(errorMessage);
-            return;
-        }
+        var Monday = DateTime.Today.AddDays(
+            ((int)DayOfWeek.Monday - (int)DateTime.Today.DayOfWeek + 7) % 7);
 
-        if (string.IsNullOrWhiteSpace(WorkoutFeature.SessionPerWeek))
-        {
-            Console.WriteLine(errorMessage);
-            return;
-        }
-
-        if (string.IsNullOrWhiteSpace(WorkoutFeature.PlanFocus))
-        {
-            Console.WriteLine(errorMessage);
-            return;
-        }
-        var monday = DateTime.Today.AddDays(
-            ((int)DaysOfWeek.monday - (int)DateTime.Today.DayOfWeek + 7) % 7);
-
-            if (monday == DateTime.Today){ monday = monday.AddDays(7);}
+            if (Monday == DateTime.Today){ Monday = Monday.AddDays(7);}
             
 
         int[] session = new int[7];
@@ -193,18 +181,16 @@
             "4" => new[] {0, 2, 4, 6},
             "5" => new[] {0, 2, 4, 5, 6},
             "6" => new[] {0, 1, 2, 4, 5, 6},
-            "7" => new[] {
-    0, 1, 2, 3, 4, 5, 6},
+            "7" => new[] {0, 1, 2, 3, 4, 5, 6},
             _   => Array.Empty<int>()
         };
 
-        GeneratedSession = dayOffsets.Select((offset, index) => new WorkoutInformation
+        GeneratedSessions = dayOffsets.Select((offset, index) => new WorkoutSession
         {
             SessionNumber = index + 1,
-            Description = WorkoutFeature.WorkoutInformation,
-            plannedDate = monday.AddDays(dayOffsets)
+            TaskDescription = WorkoutFeature.WorkoutInformation,
+            PlannedDate = Monday.AddDays(offset)
         }).ToList();
-
 
         isSaved = true;
     }
@@ -228,7 +214,7 @@
             ExperienceLevel = WorkoutFeature.ExperienceLevel,
             SessionPerWeek = WorkoutFeature.SessionPerWeek,
             PlanFocus = WorkoutFeature.PlanFocus,
-            DateCreated = DateTime.UtcNow,
+            DateCreated = DateTime.Now,
             @* Sessions = Preview *@
         };
 

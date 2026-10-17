@@ -18,7 +18,13 @@
     <input type="number" @bind="targetSec" />
 </div>
 
-<button @onclick="CalculateWatts">Calculate</button>
+<div>
+    <button class="CalculateButton" @onclick="CalculateWatts">Calculate</button>
+</div>
+
+<div>
+    <label class="errormessage">@errorMessage</label>
+</div>
 
 @if (resultText != null)
 {
@@ -26,16 +32,16 @@
 }
 
 @code {
-    private int distance;
-    private int targetMin;
-    private int targetSec;
-
+    private int? distance;
+    private int? targetMin;
+    private int? targetSec;
     private string ?resultText;
+    private string errorMessage = "";
 
     private double CalculateSplit()
     {
-        int targetTime = (targetMin * 60) + targetSec;
-        double pace = (double)targetTime / distance * 500;
+        int targetTime = (targetMin.Value * 60) + targetSec.Value;
+        double pace = (double)targetTime / distance.Value * 500;
         double minutes = (pace / 60);
         double seconds = pace % 60;
         resultText = $"{minutes}:{seconds:00}";
@@ -50,6 +56,26 @@
 
     private void CalculateWatts()
     {
+        resultText = null;
+        errorMessage = "";
+
+        if (distance is null || targetMin is null || targetSec is null)
+        {
+            errorMessage = "Enter information";
+            return;
+        }
+        if (distance < 0 || distance > 10000)
+        {
+            errorMessage = "Enter a valid distance";
+            return;
+        }
+        if (targetMin < 0 || targetMin > 30 || 
+        targetSec < 0 || targetSec > 59)
+        {
+            errorMessage = "Enter a valid time";
+            return;
+        }
+
         double pace = CalculatePace();
         double watts = Math.Round(2.80/ Math.Pow(pace,3));
         resultText = $"Watts: {watts}";

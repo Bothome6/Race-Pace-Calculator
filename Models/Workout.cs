@@ -36,7 +36,7 @@ namespace NEA_Rowing_Calculation_Website.Model
             ("Beginner", "2kTest", "Cardio") => "3 × 1000m with 3 min rest, 20 spm",
             ("Intermediate", "Fat Loss", "Technique") => "30 min steady with pause drills, 20 spm",
             ("Intermediate", "Fat Loss", "Power") => "8x 1 min hard, 1 min easy, 20 spm",
-            ("Intermediate", "Fat Loss", "Cardio") => "8x 1 min hard, 1 min easy, 20 spm",
+            ("Intermediate", "Fat Loss", "Cardio") => "40 min steady, 20 spm",
             ("Intermediate", "Endurance", "Technique") => "40 min steady with rate ladder, 18-20 spm",
             ("Intermediate", "Endurance", "Power") => "5 × 6 min low rate, high resistance with 2 min rest, 20 spm",
             ("Intermediate", "Endurance", "Cardio") => "50 min steady, 20 spm",

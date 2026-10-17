@@ -15,7 +15,6 @@ namespace NEA_Rowing_Calculation_Website
         public int SessionNumber { get; set; }
         public string TaskDescription { get; set; } = "";
         public DateTime PlannedDate { get; set; }
-
         public bool Done { get; set; }
         public DateTime? DoneDate { get; set; }
 

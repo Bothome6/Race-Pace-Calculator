@@ -20,11 +20,15 @@
     <input type="number" @bind="targetSec" />
 </div>
 
-<button @onclick="CalculateAll">Calculate</button>
+<div>
+<button class="CalculateButton" @onclick="CalculateAll">Calculate</button>
+</div>
 
-@if (resultText != null)
+@if (!string.IsNullOrWhiteSpace(errorMessage))
 {
-    <p><b>Your split: @resultText</b></p>
+    <div>
+        <label class="errormessage">@errorMessage</label>
+    </div>
 }
 
 <h4>Predicted Profile</h4>
@@ -58,27 +62,49 @@
 
 
 @code {
-    private int distance;
-    private int targetMin;
-    private int targetSec;
+    private int? distance;
+    private int? targetMin;
+    private int? targetSec;
     private string? resultText;
     private string? firstResultText;
     private string? secondResultText;
     private string? thirdResultText;
     private string? fiveResultText;
     private string? sixResultText;
-
+    private string errorMessage = "";
+    private bool errorCheck = false;
 
 
     private int CalculateSplitTime()
     {
-        int targetTime = (targetMin * 60) + targetSec;
-        double pace = (double)targetTime / distance * 500; 
+        int targetTime = (targetMin.Value * 60) + targetSec.Value;
+        double pace = (double)targetTime / distance.Value * 500; 
         return (int)pace;
     }
 
     private void CalculateAll()
     {
+        errorCheck = true;
+        errorMessage = "";
+
+        if (distance is null || targetMin is null || targetSec is null)
+        {
+            errorMessage = "Enter information";
+            return;
+        }
+        if (distance < 0 || distance > 10000)
+        {
+            errorMessage = "Enter a valid distance";
+            return;
+        }
+        if (targetMin < 0 || targetMin > 30 || 
+        targetSec < 0 || targetSec > 59)
+        {
+            errorMessage = "Enter a valid time";
+            return;
+        }
+        errorCheck = false;
+        
         Calculate100();
         Calculate500();
         Calculate1000();
@@ -99,7 +125,7 @@
     private void Calculate100()
     {
         int time = CalculateSplitTime();
-        int predic = (int)(time + 5 * Math.Log2(100.0 / distance));
+        int predic = (int)(time + 5 * Math.Log2(100.0 / distance.Value));
         int totalTime = predic * 100 / 500;
         int minutes = (int)(totalTime / 60);
         double seconds = totalTime% 60;
@@ -108,7 +134,7 @@
     private void Calculate500()
     {
         int time = CalculateSplitTime();
-        int predic = (int)(time + 5 * Math.Log2(500.0 / distance));
+        int predic = (int)(time + 5 * Math.Log2(500.0 / distance.Value));
         int totalTime = predic * 500 / 500;
         int minutes = (int)(totalTime / 60);
         double seconds = totalTime% 60;
@@ -117,7 +143,7 @@
     private void Calculate1000()
     {
         int time = CalculateSplitTime();
-        int predic = (int)(time + 5 * Math.Log2(1000.0 / distance));
+        int predic = (int)(time + 5 * Math.Log2(1000.0 / distance.Value));
         int totalTime = predic * 1000 / 500;
         int minutes = (int)(totalTime / 60);
         double seconds = totalTime% 60;
@@ -126,7 +152,7 @@
     private void Calculate2000()
     {
         int time = CalculateSplitTime();
-        int predic = (int)(time + 5 * Math.Log2(2000.0 / distance));
+        int predic = (int)(time + 5 * Math.Log2(2000.0 / distance.Value));
         int totalTime = predic * 2000 / 500;
         int minutes = (int)(totalTime / 60);
         double seconds = totalTime% 60;
@@ -135,7 +161,7 @@
     private void Calculate5000()
     {
         int time = CalculateSplitTime();
-        int predic = (int)(time + 5 * Math.Log2(5000.0 / distance));
+        int predic = (int)(time + 5 * Math.Log2(5000.0 / distance.Value));
         int totalTime = predic * 5000 / 500;
         int minutes = (int)(totalTime / 60);
         double seconds = totalTime% 60;
@@ -144,7 +170,7 @@
     private void Calculate10000()
     {
         int time = CalculateSplitTime();
-        int predic = (int)(time + 5 * Math.Log2(10000.0 / distance));
+        int predic = (int)(time + 5 * Math.Log2(10000.0 / distance.Value));
         int totalTime = predic * 10000 / 500;
         int minutes = (int)(totalTime / 60);
         double seconds = totalTime% 60;
