@@ -2,17 +2,15 @@
 @using System.ComponentModel
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Components.Authorization
-@using Microsoft.CodeAnalysis.CSharp.Syntax
-@using Microsoft.CodeAnalysis.CodeActions
-@using Microsoft.CodeAnalysis.Diagnostics
-@using NEA_Rowing_Calculation_Website.Migrations
-@using NuGet.Common
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @inject AuthenticationStateProvider AuthProvider
 @using Microsoft.EntityFrameworkCore
 @using NEA_Rowing_Calculation_Website.Data
 @using NEA_Rowing_Calculation_Website.Model
 @rendermode InteractiveServer
 @inject IDbContextFactory<ApplicationDbContext> DbFactory
+
+<p>User ID: @(userId ?? "Not signed in")</p>
 
 <h2>Generate your rowing workout</h2>
 
@@ -24,7 +22,7 @@
             <option value="">-- Choose Goal --</option>
             <option value="Fat Loss">Fat Loss</option>
             <option value="Endurance">Endurance</option>
-            <option value="2kTest">2k Test Prep</option>
+            <option value="2k Test">2k Test Prep</option>
         </select>
     </div>
 
@@ -50,7 +48,6 @@
             <option value="4">4</option>
             <option value="5">5</option>
             <option value="6">6</option>
-            <option value="7">7</option>
         </select>
     </div>
 
@@ -73,34 +70,10 @@
     </div>
 </div>
 
-@* @if (2k)
-    {
-        <h3>Split Calculator</h3>
-
-    <div>
-        <label>Distance (meters):</label>
-        <input type="number" @bind="distance" />
-    </div>
-
-    <h4>Target Time</h4>
-
-    <div>
-        <label>Minutes:</label>
-        <input type="number" @bind="targetMin" />
-    </div>
-
-    <div>
-        <label>Seconds:</label>
-        <input type="number" @bind="targetSec" />
-    </div>
-
-    <button @onclick="CalculateSplit">Calculate</button>
-} *@
-
 @if (isSaved)
 {
     <div>
-        <h5>Workout Plan Generated Successfully</h5>
+        <h5>Workout Plan</h5>
         <table class="WorkoutGeneratedTable">
             <thead class="TableDarkness">
                 <tr>
@@ -115,11 +88,13 @@
             </thead>
             <tbody>
                 <tr>
-                    <td>@WorkoutFeature.PrimaryGoal</td>
-                    <td>@WorkoutFeature.ExperienceLevel</td>
-                    <td>@WorkoutFeature.SessionPerWeek</td>
-                    <td>@WorkoutFeature.PlanFocus</td>
-                    <td>@WorkoutFeature.DateCreated.ToShortDateString()</td>
+                    <td>@GetWorkoutForDay(DayOfWeek.Monday)</td>
+                    <td>@GetWorkoutForDay(DayOfWeek.Tuesday)</td>
+                    <td>@GetWorkoutForDay(DayOfWeek.Wednesday)</td>
+                    <td>@GetWorkoutForDay(DayOfWeek.Thursday)</td>
+                    <td>@GetWorkoutForDay(DayOfWeek.Friday)</td>
+                    <td>@GetWorkoutForDay(DayOfWeek.Saturday)</td>
+                    <td>@GetWorkoutForDay(DayOfWeek.Sunday)</td>
                 </tr>
             </tbody>
         </table>
@@ -136,21 +111,20 @@
     private bool isSaved = false;
     string errorMessage = "";
     private List<WorkoutSession> GeneratedSessions {get;set;} = new List<WorkoutSession>();
-    
-    @* private int distance;
-    private int targetMin;
-    private int targetSec;
-    private int resultTest;
+    private string? userId;
 
-    private void CalculateSplit()
+    public string GetWorkoutForDay(DayOfWeek day)
     {
-        int targetTime = (targetMin * 60) + targetSec;
-        double pace = (double)targetTime / distance * 500;
-        int  minutes = (int)(pace / 60);
-        double seconds = pace % 60;
-        resultText = $"{minutes}:{seconds:00}";
-    } *@
+        return GeneratedSessions
+        .FirstOrDefault(session => session.PlannedDate.DayOfWeek == day)
+        ?.TaskDescription;
+    }
 
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        userId = state.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    }
 
     private void GenerateTable()
     {
@@ -167,12 +141,12 @@
         }
 
         var Monday = DateTime.Today.AddDays(
-            ((int)DayOfWeek.Monday - (int)DateTime.Today.DayOfWeek + 7) % 7);
+            ((int)DayOfWeek.Monday - (int)DateTime.Today.DayOfWeek + 6) % 6);
 
-            if (Monday == DateTime.Today){ Monday = Monday.AddDays(7);}
-            
+        if (Monday == DateTime.Today){ Monday = Monday.AddDays(6);}
 
-        int[] session = new int[7];
+
+        int[] session = new int[6];
         int[]? dayOffsets = WorkoutFeature.SessionPerWeek switch
         {
             "1" => new[] {5},
@@ -181,14 +155,13 @@
             "4" => new[] {0, 2, 4, 6},
             "5" => new[] {0, 2, 4, 5, 6},
             "6" => new[] {0, 1, 2, 4, 5, 6},
-            "7" => new[] {0, 1, 2, 3, 4, 5, 6},
             _   => Array.Empty<int>()
         };
 
         GeneratedSessions = dayOffsets.Select((offset, index) => new WorkoutSession
         {
             SessionNumber = index + 1,
-            TaskDescription = WorkoutFeature.WorkoutInformation,
+            TaskDescription = WorkoutFeature.WorkoutInformation[index],
             PlannedDate = Monday.AddDays(offset)
         }).ToList();
 
@@ -215,7 +188,7 @@
             SessionPerWeek = WorkoutFeature.SessionPerWeek,
             PlanFocus = WorkoutFeature.PlanFocus,
             DateCreated = DateTime.Now,
-            @* Sessions = Preview *@
+            @* Sessions =  *@
         };
 
         await using ApplicationDbContext? db = await DbFactory.CreateDbContextAsync();
@@ -224,5 +197,4 @@
 
         errorMessage = "Plan saved.";
     }
-
 }
