@@ -1,6 +1,16 @@
+@using System.Numerics
 @using System.Security.Claims
+@using System.Threading.Tasks
 @using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.EntityFrameworkCore.Metadata
+@using NEA_Rowing_Calculation_Website.Data
+@using NEA_Rowing_Calculation_Website.Migrations
+@using NEA_Rowing_Calculation_Website.Model
+@using SQLitePCL
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject AuthenticationStateProvider AuthProvider
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
 @page "/account"
 @rendermode InteractiveServer
 
@@ -8,16 +18,109 @@
 
 <h1>Welcome to your account</h1>
 
-<p>Find all of your saved workouts here.</p>
+@if (isLoading)
+{
+    <p>Plan is loading...</p>
+}
+else if (string.IsNullOrEmpty(userId))
+{
+    <p>Sign into your account:</p>
+    <NavLink class="nav-link" href="/Identity/Account/Login?ReturnUrl=%2Faccount">
+    Login
+    </NavLink>
+}
+else if (activePlan is null)
+{
+    <p>No plan has been saved in your account.</p>
+    <NavLink class="nav-link" href="workout-generator">
+    Workout Generator
+    </NavLink>
+}
+else if (nextSession is null)
+{
+    <p>You have no more sessions.</p>
+}
+else
+{
+    <p>Your next sessions:</p>
+
+    <p>Date: @nextSession.PlannedDate.ToString("dddd, d MMMM yyyy")</p>
+    <p>Workout: @nextSession.TaskDescription</p>
+
+    <button class="DoneButton" @onclick="Done" disabled="isProcessing">Done</button>
+    <button class="AbandonButton" @onclick="Abandon" disabled="isProcessing">Abandon</button>
+}
 
 <p>User ID: @(userId ?? "Not signed in")</p>
 
 @code {
     private string? userId;
+    private bool isLoading = true;
+    private bool isProcessing;
+    private Workout? activePlan;
+    private WorkoutSession? nextSession;
+    public string message = "";
 
     protected override async Task OnInitializedAsync()
     {
         var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         userId = state.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (userId is null)
+        {
+            isLoading = false;
+        }
+        else
+        {
+            await using ApplicationDbContext db = await DbFactory.CreateDbContextAsync();
+            activePlan = await db.Workouts.Include(BeingChecked => BeingChecked.Sessions)
+            .FirstOrDefaultAsync(beingChecked => beingChecked.UserID == userId);
+            if (activePlan != null)
+            {
+                nextSession = activePlan.Sessions
+                .Where(s => s.Done == false)
+                .OrderBy(s => s.PlannedDate)
+                .FirstOrDefault();
+            }
+        }
+        isLoading = false;
+    }
+
+
+
+    private void Done()
+    {
+        if(nextSession is null)
+        {
+            return;
+        }
+        else
+        {
+            
+        }
+    }
+
+    private async Task Abandon()
+    {
+        if (activePlan is null)
+        {
+            return;
+        }
+        else
+        {
+            await using ApplicationDbContext db = await DbFactory.CreateDbContextAsync();
+            activePlan = await db.Workouts
+            .FirstOrDefaultAsync(p => p.WorkoutID == activePlan.WorkoutID && p.UserID == userId);
+
+            if (activePlan != null)
+            {
+                activePlan.Abandoned = true;
+                await db.SaveChangesAsync();
+                activePlan = null;
+                nextSession = null;
+
+                message = "Plan Abandoned";
+            }
+        }
     }
 }

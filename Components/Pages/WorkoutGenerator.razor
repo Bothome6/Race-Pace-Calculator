@@ -14,8 +14,8 @@
 
 <h2>Generate your rowing workout</h2>
 
+<!-- the dropdowns-->
 <div>
-    <!-- Primary Goal -->
     <div>
         <label>Primary Goal</label>
         <select @bind="WorkoutFeature.PrimaryGoal">
@@ -27,7 +27,6 @@
     </div>
 
     <div>
-        <!--Experience Level-->
         <label >Experience Level</label>
         <select @bind="WorkoutFeature.ExperienceLevel">
             <option value="">-- Choose Level --</option>
@@ -38,7 +37,6 @@
     </div>
 
     <div>
-        <!--Session Per Week-->
         <label >Sessions Per Week</label>
         <select @bind="WorkoutFeature.SessionPerWeek">
             <option value="">-- Choose Frequency --</option>
@@ -52,7 +50,6 @@
     </div>
 
     <div>
-        <!--Focus-->
         <label >Focus</label>
         <select @bind="WorkoutFeature.PlanFocus">
             <option value="">-- Choose Focus --</option>
@@ -63,13 +60,14 @@
     </div>
 
     <div>
-        <button @onclick="GenerateTable">Generate Table</button>
+        <button @onclick="Generating">Generate Table</button>
     </div>
     <div>
         <label class="errormessage">@errorMessage</label>
     </div>
 </div>
 
+<!--layout of the table-->
 @if (isSaved)
 {
     <div>
@@ -102,7 +100,7 @@
 }
 
     <div>
-        <button @onclick="SaveTable">Save Table</button>
+        <button @onclick="saving">Save Table</button>
     </div>
 
 @code
@@ -113,6 +111,7 @@
     private List<WorkoutSession> GeneratedSessions {get;set;} = new List<WorkoutSession>();
     private string? userId;
 
+    <!--finds a workout specific to a day-->
     public string GetWorkoutForDay(DayOfWeek day)
     {
         return GeneratedSessions
@@ -120,17 +119,21 @@
         ?.TaskDescription;
     }
 
+    <!--identifying the page to the user-->
     protected override async Task OnInitializedAsync()
     {
         var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         userId = state.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
     }
-
-    private void GenerateTable()
+        
+    <!--generating the table layout-->
+    private void Generating()
     {
+
         isSaved = false;
         errorMessage = "Please select an option in each feature.";
 
+        <!--error message-->
         if (string.IsNullOrWhiteSpace(WorkoutFeature.PrimaryGoal) ||
         string.IsNullOrWhiteSpace(WorkoutFeature.ExperienceLevel) ||
         string.IsNullOrWhiteSpace(WorkoutFeature.SessionPerWeek) || 
@@ -145,7 +148,7 @@
 
         if (Monday == DateTime.Today){ Monday = Monday.AddDays(6);}
 
-
+        <!--sets the days of the workouts depending on amount of workouts from user-->
         int[] session = new int[6];
         int[]? dayOffsets = WorkoutFeature.SessionPerWeek switch
         {
@@ -168,7 +171,7 @@
         isSaved = true;
     }
 
-    private async Task SaveTable()
+    private async Task saving()
     {
         AuthenticationState? auth = await AuthProvider.GetAuthenticationStateAsync();
         ClaimsPrincipal? user = auth.User;
@@ -188,7 +191,7 @@
             SessionPerWeek = WorkoutFeature.SessionPerWeek,
             PlanFocus = WorkoutFeature.PlanFocus,
             DateCreated = DateTime.Now,
-            @* Sessions =  *@
+            Sessions =  GeneratedSessions
         };
 
         await using ApplicationDbContext? db = await DbFactory.CreateDbContextAsync();
