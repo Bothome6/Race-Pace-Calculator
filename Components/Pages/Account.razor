@@ -47,11 +47,9 @@ else
     <p>Date: @nextSession.PlannedDate.ToString("dddd, d MMMM yyyy")</p>
     <p>Workout: @nextSession.TaskDescription</p>
 
-    <button class="DoneButton" @onclick="Done" disabled="isProcessing">Done</button>
-    <button class="AbandonButton" @onclick="Abandon" disabled="isProcessing">Abandon</button>
+    <button class="DoneButton" @onclick="Done" disabled="@isProcessing">Done</button>
+    <button class="AbandonButton" @onclick="Abandon" disabled="@isProcessing">Abandon</button>
 }
-
-<p>User ID: @(userId ?? "Not signed in")</p>
 
 @code {
     private string? userId;
@@ -74,9 +72,11 @@ else
         {
             await using ApplicationDbContext db = await DbFactory.CreateDbContextAsync();
             activePlan = await db.Workouts.Include(BeingChecked => BeingChecked.Sessions)
-            .FirstOrDefaultAsync(beingChecked => beingChecked.UserID == userId);
+            .OrderByDescending(plan => plan.DateCreated)
+            .FirstOrDefaultAsync(beingChecked => beingChecked.UserID == userId && !beingChecked.Abandoned);
             if (activePlan != null)
             {
+                <!--finds the next session-->
                 nextSession = activePlan.Sessions
                 .Where(s => s.Done == false)
                 .OrderBy(s => s.PlannedDate)
@@ -86,9 +86,7 @@ else
         isLoading = false;
     }
 
-
-
-    private void Done()
+    private async Task Done()
     {
         if(nextSession is null)
         {
@@ -96,8 +94,30 @@ else
         }
         else
         {
+            await using ApplicationDbContext db = await DbFactory.CreateDbContextAsync();
+            nextSession = await db.WorkoutSessions
+            .FirstOrDefaultAsync(session => session.WorkoutSessionID == nextSession.WorkoutSessionID);
             
+                if (nextSession != null)
+                {
+                nextSession.Done = true;
+                nextSession.DoneDate = DateTime.Today;
+                await db.SaveChangesAsync();
+
+                activePlan = await db.Workouts.Include(BeingChecked => BeingChecked.Sessions)
+                .FirstOrDefaultAsync(beingChecked => beingChecked.WorkoutID == activePlan.WorkoutID && !beingChecked.Abandoned);
+
+                    if (activePlan != null)
+                    {
+                    nextSession = activePlan.Sessions
+                        .Where(s => s.Done == false)
+                        .OrderBy(s => s.PlannedDate)
+                        .FirstOrDefault();
+                    }
+                }
+
         }
+
     }
 
     private async Task Abandon()
@@ -108,12 +128,14 @@ else
         }
         else
         {
+            <!--finds plan which match with workout and user id-->
             await using ApplicationDbContext db = await DbFactory.CreateDbContextAsync();
             activePlan = await db.Workouts
             .FirstOrDefaultAsync(p => p.WorkoutID == activePlan.WorkoutID && p.UserID == userId);
 
             if (activePlan != null)
             {
+                <!--removes from account-->
                 activePlan.Abandoned = true;
                 await db.SaveChangesAsync();
                 activePlan = null;
