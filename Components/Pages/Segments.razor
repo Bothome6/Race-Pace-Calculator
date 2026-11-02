@@ -1,2 +1,107 @@
 @page "/segments"
 @rendermode InteractiveServer
+
+<h1>Segment Calculator</h1>
+
+<div>
+    <label for="quantity">Distance (meters):</label>
+    <input type="number" name="quantity" @bind="distance" />
+</div>
+
+<h4>Target Time</h4>
+
+<div>
+    <label for="quantity" >Minutes:</label>
+    <input type="number" name="quantity" @bind="targetMin" />
+</div>
+
+<div>
+    <label for="quantity" >Seconds:</label>
+    <input type="number" name="quantity" @bind="targetSec" />
+</div>
+
+<div>
+    <select>
+        <label>Segment Length</label>
+        <option value="">-- Choose Distance --</option>
+        <option value="250">250m</option>
+        <option value="500">500m</option>
+        <option value="1000">1000m</option>
+    </select>
+</div>
+
+<div>
+    <select>
+        <label>Strategy</label>
+        <option value="">-- Choose Strategy --</option>
+        <option value="Equal">Equal</option>
+        <option value="Negative">Negative</option>
+        <option value="Positive">Positive</option>
+    </select>
+</div>
+
+<div>
+    <button class="CalculateButton" @onclick="Calculate">Calculate</button>
+</div>
+
+<div>
+    <label class="errorMessgae">@errorMessage</label>
+</div>
+
+@if (resultText != null)
+{
+    <p><b>Your split: @resultText</b></p>
+    
+    <table>
+        
+    </table>
+}
+
+@code
+{
+    private int? distance;
+    private int? targetMin;
+    private int? targetSec;
+    private string? resultText;
+    public string errorMessage = "";
+
+    private void Calculate()
+    {
+        resultText = null;
+        errorMessage = "";
+
+        if (distance is null || targetMin is null || targetSec is null)
+        {
+            errorMessage = "Enter information";
+            return;
+        }
+        if (distance < 0 || distance > 100000)
+        {
+            errorMessage = "Enter a valid distance";
+            return;
+        }
+        if (targetMin < 0 || targetMin > 30 || 
+        targetSec < 0 || targetSec > 59)
+        {
+            errorMessage = "Enter a valid time";
+            return;
+        }
+
+        int targetTime = (targetMin.Value * 60) + targetSec.Value;
+        double pace = (double)targetTime / distance.Value * 500;
+        int  minutes = (int)(pace / 60);
+        double seconds = pace % 60;
+        resultText = $"{minutes}:{seconds:00}"; 
+    }
+
+    private void BalanceCalculation()
+    {
+        int time = CalculateSplitTime();
+        int predic = (int)Math.Pow(time * (5000.0 / distance), 1.06);
+        int minutes = (int)(predic / 60);
+        double seconds = predic% 60;
+        balanceResultText = $"{minutes}:{seconds:F0}";
+
+        @* return predic; *@
+    }
+}

@@ -26,18 +26,17 @@
     <button class="CalculateButton" @onclick="CalculateSplit">Calculate</button>
 </div>
 
-
 <div>
     <label class="errorMessgae">@errorMessage</label>
 </div>
-
-
 
 @if (resultText != null)
 {
     <p><b>Your split: @resultText</b></p>
 }
 
+<h3>What is a rowing split</h3>
+<p>A rowing split is the time it takes to row 500 meters at your current pace — the standard unit of speed on a Concept2 ergometer. A 2:00/500m split means you're moving at a pace that would cover 500 meters in exactly two minutes. Splits are displayed in real time on the Concept2 Performance Monitor and are the universal language of indoor rowing: used to set training zones, compare efforts, and race.</p>
 
 @code {
     private int? distance;
@@ -45,8 +44,6 @@
     private int? targetSec;
     private string? resultText;
     public string errorMessage = "";
-
-
 
 
     private void CalculateSplit()
@@ -59,7 +56,7 @@
             errorMessage = "Enter information";
             return;
         }
-        if (distance < 0 || distance > 10000)
+        if (distance < 0 || distance > 100000)
         {
             errorMessage = "Enter a valid distance";
             return;
