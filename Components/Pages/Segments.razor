@@ -53,7 +53,7 @@
     <p><b>Your split: @resultText</b></p>
     
     <table>
-        
+
     </table>
 }
 
@@ -92,16 +92,5 @@
         int  minutes = (int)(pace / 60);
         double seconds = pace % 60;
         resultText = $"{minutes}:{seconds:00}"; 
-    }
-
-    private void BalanceCalculation()
-    {
-        int time = CalculateSplitTime();
-        int predic = (int)Math.Pow(time * (5000.0 / distance), 1.06);
-        int minutes = (int)(predic / 60);
-        double seconds = predic% 60;
-        balanceResultText = $"{minutes}:{seconds:F0}";
-
-        @* return predic; *@
     }
 }

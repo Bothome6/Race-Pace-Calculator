@@ -1,7 +1,8 @@
 @page "/predicted-split"
 @rendermode InteractiveServer
 
-<h3>Split Predictor</h3>
+<h1>Split Predictor</h1>
+<p>Model-based estimate tool for logging and planning: choose power-law and project finish times.</p>
 
 <div>
     <label>Distance (meters):</label>
@@ -60,6 +61,22 @@
         </tr>
     </table>
 
+<div>
+    <h2><strong>Formula Used</strong></h2>
+    <p>This page uses a distance-time power law often referred to as a Riegel-style model. In rowing communities, a separate rule-of-thumb called "Paul's Law" is also commonly discussed. Both approaches are best treated as estimate tools for pacing and planning.</p>
+    <p><strong>T₂ = T₁ × (D₂ / D₁)exponent</strong></p>
+
+    <h2><strong>Frequently Asked Questions</strong></h2>
+
+    <h3><strong>How accurate are these predictions?</strong></h3>
+    <p>Predictions are model-based estimates for planning and journaling. Confidence labels indicate how far you are extrapolating from your known result, and larger extrapolation generally means wider variation.</p>
+
+    <h3><strong>Why do my predictions seem off?</strong></h3>
+    <p>Common reasons: profile mismatch, large distance extrapolation, or using a non-representative source piece. Re-check with recent logged efforts and compare both model options.</p>
+
+    <h3><strong>How does this differ from the pace chart?</strong></h3>
+    <p>The Pace Chart shows finish times at a constant split. This predictor applies a selected distance model to generate estimate-based pacing and finish-time projections.</p>
+</div>
 
 @code {
     private int? distance;

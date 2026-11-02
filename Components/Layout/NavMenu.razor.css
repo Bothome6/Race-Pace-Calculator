@@ -1,0 +1,80 @@
+.top-row {
+    height: auto;
+    padding: 0.85rem 0;
+    background: linear-gradient(90deg, var(--navy) 0%, #14406b 100%);
+    border: 0;
+}
+
+.navbar-brand {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: #fff;
+}
+
+.navbar-brand:hover {
+    color: #cfe9f0;
+    text-decoration: none;
+}
+
+.navbar-row {
+    background: var(--navy-dark);
+    border-bottom: 3px solid var(--accent);
+}
+
+.nav-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.4rem 1.5rem;
+}
+
+/* ::deep is needed because NavLink is a child component */
+.nav-links ::deep .nav-link {
+    padding: 0.5rem 0.9rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #c9dcea;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: background-color 0.15s, color 0.15s;
+}
+
+.nav-links ::deep .nav-link:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.nav-links ::deep .nav-link.active {
+    color: #fff;
+    background: var(--accent);
+}
+
+.nav-links ::deep .nav-link:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+}
+
+/* push Register and Login to the right-hand side */
+.nav-links ::deep .nav-link:nth-last-child(2) {
+    margin-left: auto;
+}
+
+@media (max-width: 700px) {
+    .navbar-brand {
+        font-size: 1.1rem;
+    }
+
+    .nav-links {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding: 0.4rem 0.75rem;
+        white-space: nowrap;
+    }
+
+    .nav-links ::deep .nav-link:nth-last-child(2) {
+        margin-left: 0;
+    }
+}

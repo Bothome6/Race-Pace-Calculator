@@ -1,0 +1,71 @@
+h1 {
+    position: relative;
+    margin: 0 0 1.5rem;
+    padding-bottom: 0.75rem;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--navy);
+    border-bottom: 3px solid var(--accent-soft);
+}
+
+h1::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -3px;
+    width: 4rem;
+    height: 3px;
+    background: var(--accent);
+}
+
+p {
+    margin-bottom: 0.75rem;
+    font-size: 1.05rem;
+}
+
+button {
+    margin-right: 0.6rem;
+    padding: 0.65rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+    border: 0;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(11, 42, 74, 0.18);
+    transition: background-color 0.15s, box-shadow 0.15s;
+}
+
+button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+button:focus-visible {
+    outline: 3px solid rgba(10, 111, 132, 0.4);
+    outline-offset: 2px;
+}
+
+.DoneButton {
+    background: var(--success);
+}
+
+.DoneButton:hover:not(:disabled) {
+    background: #17633a;
+}
+
+.AbandonButton {
+    color: var(--danger);
+    background: #fff;
+    border: 2px solid var(--danger);
+    box-shadow: none;
+}
+
+.AbandonButton:hover:not(:disabled) {
+    background: #fdeceb;
+}
+
+@media (max-width: 700px) {
+    h1 { font-size: 1.6rem; }
+}

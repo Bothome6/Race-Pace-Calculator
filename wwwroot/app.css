@@ -49,3 +49,30 @@ h1:focus {
 .darker-border-checkbox.form-check-input {
     border-color: #929292;
 }
+
+:root {
+    --navy: #0b2a4a;
+    --navy-dark: #081f38;
+    --accent: #0a6f84;
+    --accent-hover: #085a6b;
+    --accent-soft: #e4f4f7;
+    --bg: #eaf1f6;
+    --surface: #ffffff;
+    --text: #1c2b39;
+    --muted: #5b6b7a;
+    --border: #d3dde6;
+    --border-strong: #b6c4d1;
+    --danger: #b3261e;
+    --success: #1f7a45;
+}
+
+html, body {
+    margin: 0;
+    font-family: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.55;
+}
+
+a, .btn-link { color: var(--accent); }
+a:hover { color: var(--accent-hover); }
