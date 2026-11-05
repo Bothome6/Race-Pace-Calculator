@@ -1,42 +1,44 @@
 @page "/segments"
+@using System.Security.Cryptography.Pkcs
+@using Microsoft.CodeAnalysis.CSharp.Syntax
 @rendermode InteractiveServer
 
 <h1>Segment Calculator</h1>
 
 <div>
-    <label for="quantity">Distance (meters):</label>
-    <input type="number" name="quantity" @bind="distance" />
+    <label id="distance" for="quantity">Distance (meters):</label>
+    <input id="quantity" type="number" name="quantity" @bind="distance" />
 </div>
 
 <h4>Target Time</h4>
 
 <div>
-    <label for="quantity" >Minutes:</label>
-    <input type="number" name="quantity" @bind="targetMin" />
+    <label id="targetMin" for="quantity" >Minutes:</label>
+    <input id="quantity" type="number" name="quantity" @bind="targetMin" />
 </div>
 
 <div>
-    <label for="quantity" >Seconds:</label>
-    <input type="number" name="quantity" @bind="targetSec" />
+    <label id="targetSec" for="quantity" >Seconds:</label>
+    <input id="quantity" type="number" name="quantity" @bind="targetSec"/>
 </div>
 
 <div>
-    <select>
-        <label>Segment Length</label>
-        <option value="">-- Choose Distance --</option>
-        <option value="250">250m</option>
-        <option value="500">500m</option>
-        <option value="1000">1000m</option>
+    <label>Segment Length</label>
+    <select @bind="distanceOptions">
+        <option id="" value="">-- Choose Distance --</option>
+        <option id="250" value="250">250m</option>
+        <option id="500" value="500">500m</option>
+        <option id="1000" value="1000">1000m</option>
     </select>
 </div>
 
 <div>
-    <select>
-        <label>Strategy</label>
-        <option value="">-- Choose Strategy --</option>
-        <option value="Equal">Equal</option>
-        <option value="Negative">Negative</option>
-        <option value="Positive">Positive</option>
+    <label>Strategy</label>
+    <select @bind="strategyOptions">
+        <option id="" value="">-- Choose Strategy --</option>
+        <option id="equal" value="Equal">Equal</option>
+        <option id="negative" value="Negative">Negative</option>
+        <option id="positive" value="Positive">Positive</option>
     </select>
 </div>
 
@@ -48,12 +50,24 @@
     <label class="errorMessgae">@errorMessage</label>
 </div>
 
-@if (resultText != null)
+@if (segments.Count > 0)
 {
-    <p><b>Your split: @resultText</b></p>
+    <p><b>Your average split: @baseResultText</b></p>
     
     <table>
-
+        <thead>
+            <th>Distance</th>
+            <th>Split</th>
+        </thead>
+        <tbody>
+            @foreach (var item in segments)
+            {
+            <tr>
+                <th>@item.Number</th>
+                <td>@item.Split</td>
+            </tr>
+            }
+        </tbody>
     </table>
 }
 
@@ -62,12 +76,23 @@
     private int? distance;
     private int? targetMin;
     private int? targetSec;
+    private string? strategyOptions;
+    private int? distanceOptions;
     private string? resultText;
+    private string? baseResultText;
     public string errorMessage = "";
+    private List<SegmentResult> segments = new();
+
+    private class SegmentResult()
+    {
+        public int Number {get; set;}
+        public string Split {get; set;}
+    }
 
     private void Calculate()
     {
         resultText = null;
+        segments.Clear();
         errorMessage = "";
 
         if (distance is null || targetMin is null || targetSec is null)
@@ -75,9 +100,9 @@
             errorMessage = "Enter information";
             return;
         }
-        if (distance < 0 || distance > 100000)
+        if (distance < 0 || distance > 100000 || distance % 250 != 0)
         {
-            errorMessage = "Enter a valid distance";
+            errorMessage = "Enter a valid distance (must be a multiple of 250 between 0 and 100,000)";
             return;
         }
         if (targetMin < 0 || targetMin > 30 || 
@@ -86,11 +111,70 @@
             errorMessage = "Enter a valid time";
             return;
         }
+        if(distanceOptions is null)
+        {
+            errorMessage = "Select a distance";
+            return;
+        }
+        if(strategyOptions is null)
+        {
+            errorMessage = "Select a strategy";
+            return;
+        }
 
+        //calculating the segment
+        int totalSegments = distance.Value / distanceOptions.Value;
+        int remainder = distance.Value % distanceOptions.Value;
         int targetTime = (targetMin.Value * 60) + targetSec.Value;
-        double pace = (double)targetTime / distance.Value * 500;
-        int  minutes = (int)(pace / 60);
-        double seconds = pace % 60;
-        resultText = $"{minutes}:{seconds:00}"; 
-    }
+
+        double baseSplit = (double)targetTime / distance.Value * 500;
+        int segmentRow = 0;
+        int finalTotalSegments = remainder > 0 ? totalSegments + 1 : totalSegments;
+
+        <!--creates multiple splits depending on amount of segments-->
+        for (int start = 0; start < distance.Value; start += distanceOptions.Value)
+        {
+            int segmentDistance = Math.Min(distanceOptions.Value, distance.Value - start);
+            
+            <!--calculate equal split strategy-->
+            if (strategyOptions == "Equal")
+            {
+            double pace = (double)targetTime / distance.Value * 500;
+            int  minutes = (int)(pace / 60);
+            double seconds = pace % 60;
+            resultText = $"{minutes}:{seconds:00}"; 
+            }
+
+            <!--calculate negative split strategy-->
+            else if (strategyOptions == "Negative")
+            {
+                double actualitySegment = finalTotalSegments > 1 ? -1.0 + (2.0 * segmentRow / (finalTotalSegments - 1)) : 0;
+                double negativeBaseSplit = baseSplit - (actualitySegment * 1.5);
+
+                int minutes = (int)(negativeBaseSplit/60);
+                double seconds = negativeBaseSplit % 60;
+                resultText = $"{minutes}:{seconds:00}";
+            }
+
+            <!--calculate positive split strategy-->
+            else if (strategyOptions == "Positive")
+            {
+                double actualitySegment = finalTotalSegments > 1 ? -1.0 + (2.0 * segmentRow / (finalTotalSegments - 1)) : 0;
+                double positveBaseSplit = baseSplit + (actualitySegment * 1.5);
+
+                int minutes = (int)(positveBaseSplit/60);
+                double seconds = positveBaseSplit % 60;
+                resultText = $"{minutes}:{seconds:00}";
+            }
+
+            <!--adding the results to table-->
+            segments.Add(new SegmentResult
+            {
+                Number = segmentDistance,
+                Split = resultText,
+            });
+
+            segmentRow ++;
+        }
+    }   
 }

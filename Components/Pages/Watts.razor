@@ -31,6 +31,15 @@
     <p><b>@resultText</b></p>
 }
 
+<div>
+    <h2><strong>Formula Used</strong></h2>
+    <p>Both watt conversions use the standard power-pace relationship derived from rowing physics: Watts = 2.8 ÷ (split_sec / 500)³. The relationship is cubic — going from 2:00 to 1:55 costs ~18 watts, but going from 1:35 to 1:30 costs ~45 watts for the same 5-second gain. The faster you row, the more expensive each second becomes.</p>
+    <p><strong>watts = 2.80/pace³</strong></p>
+    <p><strong>pace = ³√(2.80/watts)</strong></p>
+
+    <p>For example: a 2:05/500m split = 125 seconds/500 meters or a 0.25 pace. Watts are then calculated as (2.80/0.25 ^ 3) or (2.80/0.015625), which equals 179.2.</p>
+</div>
+
 @code {
     private int? distance;
     private int? targetMin;

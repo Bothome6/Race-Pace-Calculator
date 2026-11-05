@@ -2,6 +2,7 @@
 @using System.ComponentModel
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.CodeAnalysis.CSharp.Syntax
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject AuthenticationStateProvider AuthProvider
 @using Microsoft.EntityFrameworkCore
@@ -57,6 +58,14 @@
         </select>
     </div>
 
+    @* @if (select2k)
+    {
+    <div>
+        <label for="quantity">Enter Current Split</label>
+        <input type="number" id="quantity" name="quantity" @bind="select2k" />
+    </div>
+    } *@
+
     <div>
         <button @onclick="Generating">Generate Table</button>
     </div>
@@ -66,7 +75,7 @@
 </div>
 
 <!--layout of the table-->
-@if (isSaved)
+@if (saved)
 {
     <div>
         <h5>Workout Plan</h5>
@@ -104,7 +113,9 @@
 @code
 {
     private Workout WorkoutFeature = new Workout();
-    private bool isSaved = false;
+    private bool saved = false;
+    private int select2k;
+    private int userSplit;
     string errorMessage = "";
     private List<WorkoutSession> GeneratedSessions {get;set;} = new List<WorkoutSession>();
     private string? userId;
@@ -128,7 +139,7 @@
     private void Generating()
     {
 
-        isSaved = false;
+        saved = false;
         errorMessage = "Please select an option in each feature.";
 
         <!--error message-->
@@ -138,6 +149,13 @@
         string.IsNullOrWhiteSpace(WorkoutFeature.PlanFocus))
         {
             Console.WriteLine(errorMessage);
+            return;
+        }
+
+        <!--2000m user info-->
+        if (!string.IsNullOrWhiteSpace(WorkoutFeature.TwoKSplit))
+        {
+            userSplit = select2k;
             return;
         }
 
@@ -166,7 +184,7 @@
             PlannedDate = Monday.AddDays(offset)
         }).ToList();
 
-        isSaved = true;
+        saved = true;
     }
 
     private async Task saving()

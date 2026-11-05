@@ -5,18 +5,12 @@
 
 <PageTitle>Home</PageTitle>
 
-<h1>All About Rowing</h1>
+<h1>Train Smarter, Row Faster</h1>
+<p>Free science-powered rowing calculators for Concept2 ergometer training. Made by rowers for rowers.</p>
 
-<p>Learn how rowing statistics are calculated and try our variation of calcualtors.</p>
+<h3><strong>5 Tools</strong></h3>
+<h3><strong>100% Forever</strong></h3>
+<h3><strong>Available 24/7</strong></h3>
 
-@* <p>User ID: @(userId ?? "Not signed in")</p>
 
-@code {
-    private string? userId;
 
-    protected override async Task OnInitializedAsync()
-    {
-        var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        userId = state.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-    }
-} *@
