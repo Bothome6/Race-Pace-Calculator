@@ -1,6 +1,7 @@
 @page "/workout-generator"
 @using System.ComponentModel
 @using System.Security.Claims
+@using System.Security.Cryptography.Pkcs
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.CodeAnalysis.CSharp.Syntax
 @inject AuthenticationStateProvider AuthenticationStateProvider
@@ -58,13 +59,21 @@
         </select>
     </div>
 
-    @* @if (select2k)
+    @if (WorkoutFeature.PrimaryGoal == "2k Test")
     {
+    <h4>Enter Current 2k Split</h4>
+    <p>If you have done one.</p>
+
     <div>
-        <label for="quantity">Enter Current Split</label>
-        <input type="number" id="quantity" name="quantity" @bind="select2k" />
+        <label for="quantity" >Minutes:</label>
+        <input type="number" id="quantity" name="quantity" @bind="CurrentMin" />
     </div>
-    } *@
+
+    <div>
+        <label for="quantity" >Seconds:</label>
+        <input type="number" id="quantity" name="quantity" @bind="CurrentSec" />
+    </div>
+    }
 
     <div>
         <button @onclick="Generating">Generate Table</button>
@@ -114,9 +123,10 @@
 {
     private Workout WorkoutFeature = new Workout();
     private bool saved = false;
-    private int select2k;
-    private int userSplit;
+    private int CurrentMin;
+    private int CurrentSec;
     string errorMessage = "";
+    private string? resultText;
     private List<WorkoutSession> GeneratedSessions {get;set;} = new List<WorkoutSession>();
     private string? userId;
 
@@ -134,6 +144,21 @@
         var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         userId = state.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
     }
+
+    <!--replace "2k split" with the users 2k-->
+    private string Change2kDescription(int index)
+    {
+        var description = WorkoutFeature.WorkoutInformation[index];
+
+        if (WorkoutFeature.PrimaryGoal == "2k Test" &&
+        !string.IsNullOrWhiteSpace(resultText))
+    {
+        description = description.Replace("2k split", resultText);
+    }
+
+    return description;
+    }
+
         
     <!--generating the table layout-->
     private void Generating()
@@ -152,12 +177,18 @@
             return;
         }
 
-        <!--2000m user info-->
-        if (!string.IsNullOrWhiteSpace(WorkoutFeature.TwoKSplit))
+        <!--2k user info-->
+        if (WorkoutFeature.PrimaryGoal == "2k Test")
         {
-            userSplit = select2k;
-            return;
+            if (CurrentMin < 0 || CurrentMin > 10 || 
+            CurrentSec < 0 || CurrentSec > 59)
+            {
+                errorMessage = "Enter a valid time";
+                return;
+            }
+            resultText = $"{CurrentMin}:{CurrentSec:00}"; 
         }
+
 
         var Monday = DateTime.Today.AddDays(
             ((int)DayOfWeek.Monday - (int)DateTime.Today.DayOfWeek + 6) % 6);
@@ -180,7 +211,7 @@
         GeneratedSessions = dayOffsets.Select((offset, index) => new WorkoutSession
         {
             SessionNumber = index + 1,
-            TaskDescription = WorkoutFeature.WorkoutInformation[index],
+            TaskDescription = Change2kDescription(index),
             PlannedDate = Monday.AddDays(offset)
         }).ToList();
 
